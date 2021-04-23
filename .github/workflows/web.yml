@@ -1,0 +1,73 @@
+name: web
+
+on:
+  push:
+    branches:
+      - "**"
+    paths:
+      - web/**
+      - .github/workflows/web.yml
+    tags:
+      - v*
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - web/**
+      - .github/workflows/web.yml
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+env:
+  APP: web
+  PRODUCTION_HOST: api.labman.intric.dk
+  PLATFORMS: linux/amd64,linux/arm64
+  GHCR_CONTAINER_IMAGE: ghcr.io/${{ github.repository }}-api-server
+  DHCR_CONTAINER_IMAGE: registry.hub.docker.com/${{ github.repository }}-api-server
+
+defaults:
+  run:
+    working-directory: web
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Check for dependency updates
+        run: npx david
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build static bundle
+        run: npm run build
+
+      - name: Upload static bundle
+        uses: actions/upload-artifact@v2
+        with:
+          name: bundle
+          path: web/build
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download static bundle
+        uses: actions/download-artifact@v2
+        with:
+          name: bundle
+          path: public
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: public
