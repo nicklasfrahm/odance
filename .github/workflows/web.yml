@@ -19,13 +19,6 @@ on:
     - cron: "0 0 * * *"
   workflow_dispatch:
 
-env:
-  APP: web
-  PRODUCTION_HOST: api.labman.intric.dk
-  PLATFORMS: linux/amd64,linux/arm64
-  GHCR_CONTAINER_IMAGE: ghcr.io/${{ github.repository }}-api-server
-  DHCR_CONTAINER_IMAGE: registry.hub.docker.com/${{ github.repository }}-api-server
-
 defaults:
   run:
     working-directory: web
@@ -63,6 +56,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     steps:
       - name: Download static bundle
         uses: actions/download-artifact@v2
