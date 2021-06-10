@@ -49,21 +49,21 @@ const useStyles = makeStyles((theme) => ({
 
 const App = () => {
   const classes = useStyles();
-  const video = React.useRef(null);
 
   // Implement autoplay manually to support Safari.
-  React.useEffect(() => {
+  const video = React.useCallback((videoElement) => {
     (async () => {
-      if (video.current !== null) {
+      if (videoElement !== null) {
         try {
-          await video.current.play();
+          // Attempt to play the video.
+          await videoElement.play();
         } catch (err) {
           // Failed to play video.
           console.log(err);
         }
       }
     })();
-  }, [video.current]);
+  });
 
   return (
     <div className={classes.wrapper}>
