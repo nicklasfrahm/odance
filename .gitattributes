@@ -1,2 +1,4 @@
 # Enforce unix style line endings for text files.
 * text eol=lf
+# Track large files or binary files with Git LFS.
+*.mp4 filter=lfs diff=lfs merge=lfs -text
