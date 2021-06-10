@@ -67,7 +67,7 @@ jobs:
           path: public
 
       - name: Configure deployment URL
-        run: echo ${{ secrets.DOMAIN }} > build/CNAME
+        run: echo ${{ secrets.DOMAIN }} > public/CNAME
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
