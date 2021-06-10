@@ -3,7 +3,7 @@ name: web
 on:
   push:
     branches:
-      - "**"
+      - '**'
     paths:
       - web/**
       - .github/workflows/web.yml
@@ -11,12 +11,12 @@ on:
       - v*
   pull_request:
     branches:
-      - "**"
+      - '**'
     paths:
       - web/**
       - .github/workflows/web.yml
   schedule:
-    - cron: "0 0 * * *"
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 defaults:
@@ -33,7 +33,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v2
         with:
-          node-version: "14"
+          node-version: '14'
 
       - name: Check for dependency updates
         run: npx david
@@ -57,12 +57,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    environment:
+      name: production
     steps:
       - name: Download static bundle
         uses: actions/download-artifact@v2
         with:
           name: bundle
           path: public
+
+      - name: Configure deployment URL
+        run: echo ${{ secrets.DOMAIN }} > build/CNAME
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
