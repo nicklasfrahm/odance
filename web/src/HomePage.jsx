@@ -49,11 +49,26 @@ const useStyles = makeStyles((theme) => ({
 
 const App = () => {
   const classes = useStyles();
+  const video = React.useRef(null);
+
+  // Implement autoplay manually to support Safari.
+  React.useEffect(() => {
+    (async () => {
+      if (video.current !== null) {
+        try {
+          await video.current.play();
+        } catch (err) {
+          // Failed to play video.
+          console.log(err);
+        }
+      }
+    })();
+  }, [video.current]);
 
   return (
     <div className={classes.wrapper}>
       <div className={classes.videoContainer}>
-        <video className={classes.video} autoPlay loop muted>
+        <video ref={video} className={classes.video} loop muted>
           <source src={asset('video/guy-dancing.mp4')} type="video/mp4" />
         </video>
       </div>
