@@ -1,9 +1,18 @@
 import React from 'react';
 import { Typography, makeStyles } from '@material-ui/core';
+import { asset } from './utils';
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
     overflow: 'hidden',
+  },
+  danceCourses: {
+    display: 'flex',
+  },
+  danceCourse: {
+    width: '33%',
+    height: '200px',
+    border: '1px solid #333',
   },
   title: {
     display: 'flex',
@@ -45,7 +54,7 @@ const App = () => {
     <div className={classes.wrapper}>
       <div className={classes.videoContainer}>
         <video className={classes.video} autoPlay loop muted>
-          <source src="assets/video/guy-dancing.mp4" type="video/mp4" />
+          <source src={asset('video/guy-dancing.mp4')} type="video/mp4" />
         </video>
       </div>
       <main className={classes.main}>
@@ -57,7 +66,12 @@ const App = () => {
           <Typography variant="body1">
             He lets start dancing together!
           </Typography>
-        </section> */}
+        </section>
+        <div className={classes.danceCourses}>
+          <div className={classes.danceCourse}></div>
+          <div className={classes.danceCourse}></div>
+          <div className={classes.danceCourse}></div>
+        </div> */}
       </main>
     </div>
   );
