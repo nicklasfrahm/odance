@@ -57,7 +57,7 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     environment:
-      name: production
+      name: github-pages
     steps:
       - name: Download static bundle
         uses: actions/download-artifact@v2
