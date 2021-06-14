@@ -69,7 +69,7 @@ const App = () => {
     <div className={classes.wrapper}>
       <div className={classes.videoContainer}>
         <video ref={video} className={classes.video} loop muted>
-          <source src={asset('video/guy-dancing.mp4')} type="video/mp4" />
+          <source src={asset('video/ola-alsik.mp4')} type="video/mp4" />
         </video>
       </div>
       <main className={classes.main}>
