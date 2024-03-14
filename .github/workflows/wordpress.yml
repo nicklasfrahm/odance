@@ -1,0 +1,67 @@
+name: Wordpress
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Google Cloud VM
+    runs-on: ubuntu-latest
+    environment: google-cloud
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Configure deployment
+        run: |
+          touch .env
+          echo DOMAIN=${{ secrets.DOMAIN }} >> .env
+          echo EMAIL=${{ secrets.EMAIL }} >> .env
+          echo MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} >> .env
+          echo MYSQL_USER=${{ secrets.MYSQL_USER }} >> .env
+          echo MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} >> .env
+
+      - name: Prepare deployment host
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DOMAIN }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo install -d -m 700 -o ${{ secrets.SSH_USERNAME }} /opt/wordpress
+
+      - name: Upload docker compose
+        uses: nicklasfrahm/scp-action@main
+        with:
+          direction: upload
+          host: ${{ secrets.DOMAIN }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: docker-compose.yml
+          target: /opt/wordpress/docker-compose.yml
+
+      - name: Upload environment variables
+        uses: nicklasfrahm/scp-action@main
+        with:
+          direction: upload
+          host: ${{ secrets.DOMAIN }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: .env
+          target: /opt/wordpress/.env
+
+      - name: Upgrade deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DOMAIN }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/wordpress
+            docker compose up -d --remove-orphans

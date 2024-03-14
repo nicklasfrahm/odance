@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  nginx-proxy:
+    container_name: nginx-proxy
+    restart: always
+    image: nginxproxy/nginx-proxy:1.5.1
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  nginx-proxy-acme:
+    container_name: nginx-proxy-acme
+    volumes_from:
+      - nginx-proxy
+    restart: always
+    image: nginxproxy/acme-companion:2.2.10
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - acme:/etc/acme.sh
+    environment:
+      - "DEFAULT_EMAIL=${EMAIL}"
+
+  mariadb:
+    container_name: mariadb
+    restart: always
+    image: mariadb:10
+    command: "--default-authentication-plugin=mysql_native_password"
+    env_file: .env
+    environment:
+      - "MYSQL_DATABASE=wordpress"
+    volumes:
+      - /opt/wordpress/mysql:/var/lib/mysql
+    expose:
+      - 3306
+
+  wordpress:
+    depends_on:
+      - mariadb
+    container_name: wordpress
+    image: wordpress:6
+    restart: always
+    env_file: .env
+    environment:
+      - "WORDPRESS_DB_HOST=mariadb"
+      - "WORDPRESS_DB_USER=${MYSQL_USER}"
+      - "WORDPRESS_DB_PASSWORD=${MYSQL_PASSWORD}"
+      - "WORDPRESS_DB_NAME=wordpress"
+      - "VIRTUAL_HOST=${DOMAIN}"
+      - "LETSENCRYPT_HOST=${DOMAIN}"
+    volumes:
+      - /opt/wordpress/html:/var/www/html
+
+volumes:
+  certs:
+  vhost:
+  html:
+  acme:
